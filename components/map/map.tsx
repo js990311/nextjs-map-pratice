@@ -1,13 +1,15 @@
 "use client"
 
 import { LatLng } from "@/types/latlng";
+import { MarkerInfo } from "@/types/marker";
 import Script from "next/script";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
-type MapHandler = {
+export type MapHandler = {
     setCenter : (center: LatLng) => void;
     drawCircle : (center: LatLng, radius: number, strokeColor: string, fillColor: string) => void;
     changeRadius : (radius: number) => void;
+    drawMarkers : (markerInfos: MarkerInfo[]) => void;
 }
 
 type MapProps = {
@@ -19,12 +21,16 @@ const Map = forwardRef<MapHandler, MapProps>(
         const mapRef = useRef<HTMLDivElement | null>(null);
         const [mapState, setMapState] = useState<naver.maps.Map | null>(null);
         const circle = useRef<naver.maps.Circle | null>(null);
+        const markers = useRef<naver.maps.Marker[] | null>(null);
 
         /** 상위컴포넌트에서 사용할 메서드 제공 */
         useImperativeHandle(ref, () => ({
+            // 지도의 중심부를 결정함
             setCenter: (center)=>{
                 mapState?.setCenter(center);
             },
+
+            // 지도에 원을 그림
             drawCircle: (center, radius, strokeColor, fillColor) => {
                 if(!center || !radius){
                     return;
@@ -45,6 +51,8 @@ const Map = forwardRef<MapHandler, MapProps>(
                     map: mapState
                 });
             },
+
+            // 원의 반지름을 변경함
             changeRadius : (radius) => {
                 if(!radius){
                     return;
@@ -52,6 +60,37 @@ const Map = forwardRef<MapHandler, MapProps>(
                 if(circle.current){
                     circle.current.setRadius(radius);
                 }
+            },
+
+            // marker를 추가함
+            drawMarkers : (markerInfos) => {
+                if(!mapState){
+                    return;
+                }
+                markers.current = markerInfos.map((markerInfo : MarkerInfo) => {
+                    const marker = new naver.maps.Marker({
+                        position: markerInfo.position,
+                        map: mapState,
+                        icon: {
+                            url: markerInfo.iconUrl,
+                            size: new naver.maps.Size(25, 34),
+                            scaledSize: new naver.maps.Size(25, 34),
+                            origin: new naver.maps.Point(0, 0),
+                        }
+                    })
+                    if(markerInfo.infoContent){
+                        const infowindow = new naver.maps.InfoWindow({
+                            content: markerInfo.infoContent
+                        });
+                        naver.maps.Event.addListener(marker, "click", (e)=>{
+                            if(infowindow.getMap()){
+                                infowindow.close();
+                            }else {
+                                infowindow.open(mapState,marker);
+                            }
+                        });
+                    }
+                });
             }
         }), [mapState]);
 
