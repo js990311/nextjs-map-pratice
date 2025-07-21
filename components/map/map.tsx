@@ -90,6 +90,7 @@ const Map = forwardRef<MapHandler, MapProps>(
                             }
                         });
                     }
+                    return marker;
                 });
             }
         }), [mapState]);
