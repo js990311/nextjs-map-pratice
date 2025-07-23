@@ -88,6 +88,10 @@ const Map = forwardRef<MapHandler, MapProps>(
                             }else {
                                 infowindow.open(mapState,marker);
                             }
+
+                            if(markerInfo.onClick){ // onClick 이벤트가 있으면 실행시키기
+                                markerInfo.onClick(markerInfo.markerId)
+                            }
                         });
                     }
                     return marker;

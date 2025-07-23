@@ -4,4 +4,6 @@ export type MarkerInfo = {
     position: LatLng;
     iconUrl : string;
     infoContent ?: string;
+    markerId ?: number;
+    onClick ?: (markerId : number) => void;
 };
