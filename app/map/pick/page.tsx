@@ -30,6 +30,9 @@ export default function MapPickPage(){
         <div >
             <Map ref={mapRef}
                 className={"w-[1920px] h-[500px]"}
+                 onMapClick={(position: LatLng) => {
+                     console.log(`[pick] lat : ${position.lat} / lng : ${position.lng}`);
+                 }}
             ></Map>
             <div>
                 <button onClick={() => moveCenter()}>

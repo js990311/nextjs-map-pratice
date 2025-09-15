@@ -3,7 +3,8 @@
 import { LatLng } from "@/types/latlng";
 import { MarkerInfo } from "@/types/marker";
 import Script from "next/script";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
+import MapEventListener = naver.maps.MapEventListener;
 
 export type MapHandler = {
     setCenter : (center: LatLng) => void;
@@ -13,13 +14,15 @@ export type MapHandler = {
 }
 
 type MapProps = {
-    className ?: string
+    className ?: string,
+    onMapClick ?: (position: LatLng) => void,
 };
 
 const Map = forwardRef<MapHandler, MapProps>(
-    function Map({className} : Readonly<MapProps>, ref){
+    function Map({className, onMapClick} : Readonly<MapProps>, ref){
         const mapRef = useRef<HTMLDivElement | null>(null);
         const [mapState, setMapState] = useState<naver.maps.Map | null>(null);
+        const [mapClickListner, setMapClickListner] = useState<MapEventListener>();
         const circle = useRef<naver.maps.Circle | null>(null);
         const markers = useRef<naver.maps.Marker[] | null>(null);
 
@@ -98,6 +101,27 @@ const Map = forwardRef<MapHandler, MapProps>(
                 });
             }
         }), [mapState]);
+
+
+        useEffect(() => {
+            if(!mapState){
+                return;
+            }
+            console.log("[map] onClick map")
+            if(mapClickListner){
+                mapState.removeListener(mapClickListner);
+            }
+            const newMapClickListner: MapEventListener = mapState.addListener('click', (e) => {
+               const position: naver.maps.LatLng = e.coord;
+               if(onMapClick){
+                   onMapClick({
+                       lat: position.lat(),
+                       lng: position.lng()
+                   });
+               }
+            });
+            setMapClickListner(newMapClickListner);
+        }, [mapState, onMapClick]);
 
         const createNaverMap = () => {
             if(!mapRef.current || !window.naver) return;
