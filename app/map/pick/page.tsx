@@ -7,6 +7,7 @@ import {LatLng} from "@/types/latlng";
 export default function MapPickPage(){
     const mapRef = useRef<MapHandler>(null);
     const [center, setCenter] = useState<LatLng>({lat:37.564, lng:127.002});
+    const [clickableMap, setClickableMap] = useState<boolean>(false);
 
     useEffect(() => {
         if(navigator.geolocation){
@@ -26,17 +27,25 @@ export default function MapPickPage(){
         mapRef.current?.setCenter(center);
     }
 
+    const onClickMap = (position: LatLng) => {
+        if(clickableMap){
+            setCenter(position);
+            setClickableMap(false);
+        }
+    }
+
     return (
         <div >
             <Map ref={mapRef}
                 className={"w-[1920px] h-[500px]"}
-                 onMapClick={(position: LatLng) => {
-                     console.log(`[pick] lat : ${position.lat} / lng : ${position.lng}`);
-                 }}
+                 onMapClick={onClickMap}
             ></Map>
             <div>
                 <button onClick={() => moveCenter()}>
                     중심지점으로 가기
+                </button>
+                <button onClick={() => setClickableMap(true)}>
+                    중심지점 바꾸기
                 </button>
             </div>
         </div>
