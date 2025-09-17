@@ -70,6 +70,11 @@ const Map = forwardRef<MapHandler, MapProps>(
                 if(!mapState){
                     return;
                 }
+                if(markers.current){
+                    markers.current.map(marker=> {
+                        marker.setMap(null);
+                    })
+                }
                 markers.current = markerInfos.map((markerInfo : MarkerInfo) => {
                     const marker = new naver.maps.Marker({
                         position: markerInfo.position,

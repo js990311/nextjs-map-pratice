@@ -21,6 +21,10 @@ export default function MapPickPage(){
 
     useEffect(() => {
         moveCenter();
+        mapRef.current?.drawMarkers([{
+            position: center,
+            iconUrl: '/images/my_pin.png'
+        }]);
     }, [center]);
 
     const moveCenter = () => {
